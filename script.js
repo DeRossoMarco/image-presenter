@@ -1,10 +1,16 @@
-// Array of image URLs
-const images = [
-    'images/cars.jpg',
-    'images/dragon_trainer.jpg',
-    'images/era_glaciale.jpg',
-    'images/madagascar.jpg'
+// Define the folder path
+const imageFolderPath = 'images/';
+
+// Array of image filenames
+const imageFilenames = [
+    'cars.jpg',
+    'dragon_trainer.jpg',
+    'era_glaciale.jpg',
+    'madagascar.jpg'
 ];
+
+// Generate the full image URLs
+const images = imageFilenames.map(filename => imageFolderPath + filename);
 
 document.addEventListener('DOMContentLoaded', () => {
     const imageElement = document.getElementById('selectedImage');
