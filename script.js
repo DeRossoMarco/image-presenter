@@ -47,15 +47,20 @@ document.addEventListener('DOMContentLoaded', () => {
         return urlParams.has('admin');
     }
 
-    adminResetButton.addEventListener('click', () => {
-        resetCookie('selectedImage');
-        selectImage();
-        alert('New round initiated by admin.');
-    });
-
     if (checkAdmin()) {
         adminResetButton.style.display = 'block';
+    } else {
+        resetButton.style.display = 'block';
+        selectImage();
     }
 
-    selectImage();
+    resetButton.addEventListener('click', () => {
+        resetCookie('selectedImage');
+        selectImage();
+    });
+
+    adminResetButton.addEventListener('click', () => {
+        resetCookie('selectedImage');
+        alert('New round initiated by admin.');
+    });
 });
