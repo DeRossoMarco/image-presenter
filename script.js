@@ -1,8 +1,8 @@
 // Array of image URLs
 const images = [
-    'cars.jpg',
-    'dragon_trainer.jpg',
-    'era_glaciale.jpg',
+    'images/cars.jpg',
+    'images/dragon_trainer.jpg',
+    'images/era_glaciale.jpg',
     'madagascar.jpg'
 ];
 
