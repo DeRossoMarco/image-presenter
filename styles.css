@@ -28,10 +28,9 @@ body {
     color: #333;
 }
 
-button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    font-size: 16px;
-    width: 100%;
-    max-width: 200px;
+#adminResetButton {
+    font-size: 24px; /* Increased font size */
+    padding: 20px 40px; /* Increased padding */
+    width: 100%; /* Full width within container */
+    max-width: 400px; /* Increased max-width */
 }

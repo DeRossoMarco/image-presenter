@@ -14,6 +14,7 @@ const images = imageFilenames.map(filename => imageFolderPath + filename);
 
 document.addEventListener('DOMContentLoaded', () => {
     const imageElement = document.getElementById('selectedImage');
+    const messageElement = document.getElementById('message');
     const adminResetButton = document.getElementById('adminResetButton');
 
     function getCookie(name) {
