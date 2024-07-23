@@ -22,6 +22,12 @@ body {
     object-position: center;
 }
 
+.message {
+    margin-top: 10px;
+    font-size: 18px;
+    color: #333;
+}
+
 button {
     margin-top: 20px;
     padding: 10px 20px;
