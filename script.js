@@ -1,14 +1,13 @@
 // Array of image URLs
 const images = [
-    'image1.jpg',
-    'image2.jpg',
-    'image3.jpg',
-    'image4.jpg'
+    'cars.jpg',
+    'dragon_trainer.jpg',
+    'era_glaciale.jpg',
+    'madagascar.jpg'
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
     const imageElement = document.getElementById('selectedImage');
-    const resetButton = document.getElementById('resetButton');
     const adminResetButton = document.getElementById('adminResetButton');
 
     function getCookie(name) {
@@ -41,11 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.has('admin');
     }
-
-    resetButton.addEventListener('click', () => {
-        resetCookie('selectedImage');
-        selectImage();
-    });
 
     adminResetButton.addEventListener('click', () => {
         resetCookie('selectedImage');
