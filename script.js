@@ -39,7 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
             selectedImage = images[Math.floor(Math.random() * images.length)];
             setCookie('selectedImage', selectedImage, 7); // Set cookie for 7 days
         }
-        console.log('Selected Image:', selectedImage); // Debugging: Log the selected image URL
         imageElement.src = selectedImage;
     }
 
