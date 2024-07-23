@@ -50,14 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (checkAdmin()) {
         adminResetButton.style.display = 'block';
     } else {
-        resetButton.style.display = 'block';
         selectImage();
     }
-
-    resetButton.addEventListener('click', () => {
-        resetCookie('selectedImage');
-        selectImage();
-    });
 
     adminResetButton.addEventListener('click', () => {
         resetCookie('selectedImage');
