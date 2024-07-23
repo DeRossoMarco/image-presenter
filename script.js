@@ -69,8 +69,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         adminResetButton.style.display = 'block';
         adminResetButton.addEventListener('click', async () => {
             try {
-                // Increment the round number in the config file manually
-                alert('New round initiated by admin. Please update config.json manually.');
+                // Trigger the GitHub Action to update config.json
+                const response = await fetch('/.netlify/functions/update-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'incrementRound' })
+                });
+
+                if (response.ok) {
+                    alert('New round initiated by admin.');
+                    location.reload(); // Reload the page to apply changes
+                } else {
+                    console.error('Error updating round:', await response.text());
+                }
             } catch (error) {
                 console.error('Error initiating new round:', error);
             }
