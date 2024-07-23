@@ -49,6 +49,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (checkAdmin()) {
+        // Hide the image and message for admin
+        imageElement.style.display = 'none';
+        messageElement.style.display = 'none';
         adminResetButton.style.display = 'block';
     } else {
         selectImage();

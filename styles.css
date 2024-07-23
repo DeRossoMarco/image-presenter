@@ -29,8 +29,8 @@ body {
 }
 
 #adminResetButton {
-    font-size: 24px; /* Increased font size */
+    font-size: 40px; /* Increased font size */
     padding: 20px 40px; /* Increased padding */
     width: 100%; /* Full width within container */
-    max-width: 400px; /* Increased max-width */
+    max-width: 600px; /* Increased max-width */
 }
