@@ -3,7 +3,7 @@ const images = [
     'images/cars.jpg',
     'images/dragon_trainer.jpg',
     'images/era_glaciale.jpg',
-    'madagascar.jpg'
+    'images/madagascar.jpg'
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
