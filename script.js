@@ -4,7 +4,7 @@ const imageFolderPath = 'images/';
 // Array of image filenames
 const imageFilenames = [
     'cars.jpg',
-    'dragon_trainer.jpg',
+    'dragon_trainer.jpeg',
     'era_glaciale.jpg',
     'madagascar.jpg'
 ];
