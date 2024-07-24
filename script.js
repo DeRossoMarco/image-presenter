@@ -28,7 +28,7 @@ const imageFilenames = [
     'cars.jpg',
     'dragon_trainer.jpeg',
     'era_glaciale.jpg',
-    'madagascar2.jpg'
+    'madagascar.jpg'
 ];
 
 // Rimuove l'estensione dal nome del file
