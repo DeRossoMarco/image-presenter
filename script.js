@@ -80,37 +80,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
         Promise.all([get(imageSelectionsRef), get(roundRef)])
             .then(([imageSelectionsSnapshot, roundSnapshot]) => {
-                if (imageSelectionsSnapshot.exists() && roundSnapshot.exists()) {
-                    const imageSelections = imageSelectionsSnapshot.val();
-                    const roundFromDb = roundSnapshot.val();
+                let imageSelections = {};
+                const roundFromDb = roundSnapshot.exists() ? roundSnapshot.val() : 1; // Default to 1 if no round data
 
-                    // Trova l'immagine con il numero di selezioni minore
-                    let minSelections = Infinity;
-                    let selectedImage = null;
-
-                    for (const [image, count] of Object.entries(imageSelections)) {
-                        if (count < minSelections) {
-                            minSelections = count;
-                            selectedImage = image;
-                        }
-                    }
-
-                    if (!selectedImage || getCookie('currentRound') !== roundFromDb) {
-                        selectedImage = images[Math.floor(Math.random() * images.length)];
-                    }
-
-                    // Aggiorna il conteggio delle selezioni per l'immagine selezionata
-                    set(ref(database, `imageSelections/${selectedImage}`), minSelections + 1)
-                        .then(() => {
-                            setCookie('selectedImage', selectedImage, 7); // Imposta il cookie per 7 giorni
-                            setCookie('currentRound', roundFromDb, 7); // Imposta il cookie per 7 giorni
-                            imageElement.src = selectedImage;
-                        }).catch((error) => {
-                            console.error("Error updating image selection count: ", error);
-                        });
+                if (imageSelectionsSnapshot.exists()) {
+                    imageSelections = imageSelectionsSnapshot.val();
                 } else {
-                    console.log("No image selection data or round data available");
+                    // Se i dati delle selezioni non esistono, inizializza a 0
+                    imageSelections = imageFilenames.reduce((acc, filename) => {
+                        acc[filename] = 0;
+                        return acc;
+                    }, {});
+                    set(ref(database, 'imageSelections'), imageSelections).catch((error) => {
+                        console.error("Error initializing image selections: ", error);
+                    });
                 }
+
+                // Trova l'immagine con il numero di selezioni minore
+                let minSelections = Infinity;
+                let selectedImage = null;
+
+                for (const [image, count] of Object.entries(imageSelections)) {
+                    if (count < minSelections) {
+                        minSelections = count;
+                        selectedImage = image;
+                    }
+                }
+
+                if (!selectedImage || getCookie('currentRound') !== roundFromDb) {
+                    selectedImage = images[Math.floor(Math.random() * images.length)];
+                }
+
+                // Aggiorna il conteggio delle selezioni per l'immagine selezionata
+                set(ref(database, `imageSelections/${selectedImage}`), minSelections + 1)
+                    .then(() => {
+                        setCookie('selectedImage', selectedImage, 7); // Imposta il cookie per 7 giorni
+                        setCookie('currentRound', roundFromDb, 7); // Imposta il cookie per 7 giorni
+                        imageElement.src = selectedImage;
+                    }).catch((error) => {
+                        console.error("Error updating image selection count: ", error);
+                    });
             }).catch((error) => {
                 console.error("Error getting data: ", error);
             });
