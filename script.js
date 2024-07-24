@@ -23,16 +23,16 @@ const database = getDatabase(app);
 // Definisci il percorso della cartella immagini
 const imageFolderPath = 'images/';
 
-// Array di nomi di file immagine
-const imageFilenames = [
-    'cars.jpg',
-    'dragon_trainer.jpeg',
-    'era_glaciale.jpg',
-    'madagascar.jpg'
+// Array di nomi di file immagine e identificatori univoci
+const imageInfo = [
+    { id: '1', filename: 'cars.jpg' },
+    { id: '2', filename: 'dragon_trainer.jpeg' },
+    { id: '3', filename: 'era_glaciale.jpg' },
+    { id: '4', filename: 'madagascar.jpg' }
 ];
 
 // Genera gli URL completi delle immagini
-const images = imageFilenames.map(filename => imageFolderPath + filename);
+const images = imageInfo.map(info => ({ id: info.id, url: imageFolderPath + info.filename }));
 
 document.addEventListener('DOMContentLoaded', () => {
     const imageElement = document.getElementById('selectedImage');
@@ -54,10 +54,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resetImageSelections() {
         const imageSelectionsRef = ref(database, 'imageSelections');
-        set(imageSelectionsRef, imageFilenames.reduce((acc, filename) => {
-            acc[filename] = 0;
+        const initialSelections = imageInfo.reduce((acc, info) => {
+            acc[info.id] = 0;
             return acc;
-        }, {})).catch((error) => {
+        }, {});
+        set(imageSelectionsRef, initialSelections).catch((error) => {
             console.error("Error resetting image selections: ", error);
         });
     }
@@ -87,8 +88,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     imageSelections = imageSelectionsSnapshot.val();
                 } else {
                     // Se i dati delle selezioni non esistono, inizializza a 0
-                    imageSelections = imageFilenames.reduce((acc, filename) => {
-                        acc[filename] = 0;
+                    imageSelections = imageInfo.reduce((acc, info) => {
+                        acc[info.id] = 0;
                         return acc;
                     }, {});
                     set(ref(database, 'imageSelections'), imageSelections).catch((error) => {
@@ -100,23 +101,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 let minSelections = Infinity;
                 let selectedImage = null;
 
-                for (const [image, count] of Object.entries(imageSelections)) {
+                for (const [imageId, count] of Object.entries(imageSelections)) {
                     if (count < minSelections) {
                         minSelections = count;
-                        selectedImage = image;
+                        selectedImage = imageId;
                     }
                 }
 
                 if (!selectedImage || getCookie('currentRound') !== roundFromDb) {
-                    selectedImage = images[Math.floor(Math.random() * images.length)];
+                    selectedImage = imageInfo[Math.floor(Math.random() * imageInfo.length)].id;
                 }
 
                 // Aggiorna il conteggio delle selezioni per l'immagine selezionata
                 set(ref(database, `imageSelections/${selectedImage}`), minSelections + 1)
                     .then(() => {
-                        setCookie('selectedImage', selectedImage, 7); // Imposta il cookie per 7 giorni
+                        const selectedImageUrl = images.find(image => image.id === selectedImage).url;
+                        setCookie('selectedImage', selectedImageUrl, 7); // Imposta il cookie per 7 giorni
                         setCookie('currentRound', roundFromDb, 7); // Imposta il cookie per 7 giorni
-                        imageElement.src = selectedImage;
+                        imageElement.src = selectedImageUrl;
                     }).catch((error) => {
                         console.error("Error updating image selection count: ", error);
                     });
