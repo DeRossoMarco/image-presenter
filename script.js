@@ -1,6 +1,6 @@
 // Importa i moduli Firebase necessari
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
-import { getDatabase, ref, runTransaction } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
+import { getDatabase, ref, runTransaction, get } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
 
 // Configurazione di Firebase
 const firebaseConfig = {
@@ -13,6 +13,7 @@ const firebaseConfig = {
     appId: "1:807834218186:web:d3bc04429069cbf4a34e33",
     measurementId: "G-X9R10EH2K6"
   };
+
 // Inizializza Firebase
 const app = initializeApp(firebaseConfig);
 
@@ -69,11 +70,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function selectImage() {
         let selectedImage = getCookie('selectedImage');
-        if (!selectedImage) {
-            selectedImage = images[Math.floor(Math.random() * images.length)];
-            setCookie('selectedImage', selectedImage, 7); // Imposta il cookie per 7 giorni
-        }
-        imageElement.src = selectedImage;
+        let currentRound = getCookie('currentRound');
+
+        const roundRef = ref(database, 'round');
+        get(roundRef).then((snapshot) => {
+            if (snapshot.exists()) {
+                const roundFromDb = snapshot.val();
+                if (!selectedImage || !currentRound || parseInt(currentRound) !== roundFromDb) {
+                    currentRound = roundFromDb;
+                    selectedImage = images[Math.floor(Math.random() * images.length)];
+                    setCookie('selectedImage', selectedImage, 7); // Imposta il cookie per 7 giorni
+                    setCookie('currentRound', currentRound, 7); // Imposta il cookie per 7 giorni
+                }
+                imageElement.src = selectedImage;
+            } else {
+                console.log("No round data available");
+            }
+        }).catch((error) => {
+            console.error("Error getting round data: ", error);
+        });
     }
 
     function checkAdmin() {
@@ -92,5 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     adminResetButton.addEventListener('click', () => {
         resetCookie('selectedImage');
+        resetCookie('currentRound');
     });
 });
