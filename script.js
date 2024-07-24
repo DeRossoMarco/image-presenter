@@ -95,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Se il round è cambiato, seleziona una nuova immagine
                     if (currentRound !== roundFromDb) {
+                        print(currentRound, roundFromDb);
                         // Trova l'immagine con il numero di selezioni minore
                         let minSelections = Infinity;
                         let selectedImage = null;
