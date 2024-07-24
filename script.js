@@ -1,6 +1,6 @@
 // Importa i moduli Firebase necessari
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
-import { getDatabase, ref, runTransaction, get } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
+import { getDatabase, ref, runTransaction, get, set } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
 
 // Configurazione di Firebase
 const firebaseConfig = {
@@ -12,7 +12,7 @@ const firebaseConfig = {
     messagingSenderId: "807834218186",
     appId: "1:807834218186:web:d3bc04429069cbf4a34e33",
     measurementId: "G-X9R10EH2K6"
-  };
+};
 
 // Inizializza Firebase
 const app = initializeApp(firebaseConfig);
@@ -52,12 +52,22 @@ document.addEventListener('DOMContentLoaded', () => {
         document.cookie = `${name}=${value}; ${expires}; path=/`;
     }
 
+    function resetImageSelections() {
+        const imageSelectionsRef = ref(database, 'imageSelections');
+        set(imageSelectionsRef, imageFilenames.reduce((acc, filename) => {
+            acc[filename] = 0;
+            return acc;
+        }, {})).catch((error) => {
+            console.error("Error resetting image selections: ", error);
+        });
+    }
 
     function incrementRound() {
         const roundRef = ref(database, 'round');
         runTransaction(roundRef, (currentRound) => {
             return (currentRound || 0) + 1;
         }).then(() => {
+            resetImageSelections(); // Resetta i contatori dopo aver incrementato il round
             alert('New round initiated by admin.');
         }).catch((error) => {
             console.error("Error incrementing round: ", error);
@@ -65,26 +75,45 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function selectImage() {
-        let selectedImage = getCookie('selectedImage');
-        let currentRound = getCookie('currentRound');
-
+        const imageSelectionsRef = ref(database, 'imageSelections');
         const roundRef = ref(database, 'round');
-        get(roundRef).then((snapshot) => {
-            if (snapshot.exists()) {
-                const roundFromDb = snapshot.val();
-                if (!selectedImage || !currentRound || parseInt(currentRound) !== roundFromDb) {
-                    currentRound = roundFromDb;
-                    selectedImage = images[Math.floor(Math.random() * images.length)];
-                    setCookie('selectedImage', selectedImage, 7); // Imposta il cookie per 7 giorni
-                    setCookie('currentRound', currentRound, 7); // Imposta il cookie per 7 giorni
+
+        Promise.all([get(imageSelectionsRef), get(roundRef)])
+            .then(([imageSelectionsSnapshot, roundSnapshot]) => {
+                if (imageSelectionsSnapshot.exists() && roundSnapshot.exists()) {
+                    const imageSelections = imageSelectionsSnapshot.val();
+                    const roundFromDb = roundSnapshot.val();
+
+                    // Trova l'immagine con il numero di selezioni minore
+                    let minSelections = Infinity;
+                    let selectedImage = null;
+
+                    for (const [image, count] of Object.entries(imageSelections)) {
+                        if (count < minSelections) {
+                            minSelections = count;
+                            selectedImage = image;
+                        }
+                    }
+
+                    if (!selectedImage || getCookie('currentRound') !== roundFromDb) {
+                        selectedImage = images[Math.floor(Math.random() * images.length)];
+                    }
+
+                    // Aggiorna il conteggio delle selezioni per l'immagine selezionata
+                    set(ref(database, `imageSelections/${selectedImage}`), minSelections + 1)
+                        .then(() => {
+                            setCookie('selectedImage', selectedImage, 7); // Imposta il cookie per 7 giorni
+                            setCookie('currentRound', roundFromDb, 7); // Imposta il cookie per 7 giorni
+                            imageElement.src = selectedImage;
+                        }).catch((error) => {
+                            console.error("Error updating image selection count: ", error);
+                        });
+                } else {
+                    console.log("No image selection data or round data available");
                 }
-                imageElement.src = selectedImage;
-            } else {
-                console.log("No round data available");
-            }
-        }).catch((error) => {
-            console.error("Error getting round data: ", error);
-        });
+            }).catch((error) => {
+                console.error("Error getting data: ", error);
+            });
     }
 
     function checkAdmin() {
