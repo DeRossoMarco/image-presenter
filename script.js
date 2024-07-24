@@ -1,10 +1,28 @@
+// Importa i moduli Firebase necessari
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+import { getDatabase, ref, runTransaction } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
 
-const database = firebase.database();
+// Configurazione di Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyDlKYfKl6b2tCXjJYP3raQIEW0lMatcDHk",
+    authDomain: "giocovacanzina.firebaseapp.com",
+    databaseURL: "https://giocovacanzina-default-rtdb.firebaseio.com",
+    projectId: "giocovacanzina",
+    storageBucket: "giocovacanzina.appspot.com",
+    messagingSenderId: "807834218186",
+    appId: "1:807834218186:web:d3bc04429069cbf4a34e33",
+    measurementId: "G-X9R10EH2K6"
+  };
+// Inizializza Firebase
+const app = initializeApp(firebaseConfig);
 
-// Define the folder path
+// Ottieni una referenza al servizio database
+const database = getDatabase(app);
+
+// Definisci il percorso della cartella immagini
 const imageFolderPath = 'images/';
 
-// Array of image filenames
+// Array di nomi di file immagine
 const imageFilenames = [
     'cars.jpg',
     'dragon_trainer.jpeg',
@@ -12,7 +30,7 @@ const imageFilenames = [
     'madagascar.jpg'
 ];
 
-// Generate the full image URLs
+// Genera gli URL completi delle immagini
 const images = imageFilenames.map(filename => imageFolderPath + filename);
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -38,11 +56,22 @@ document.addEventListener('DOMContentLoaded', () => {
         incrementRound();
     }
 
+    function incrementRound() {
+        const roundRef = ref(database, 'round');
+        runTransaction(roundRef, (currentRound) => {
+            return (currentRound || 0) + 1;
+        }).then(() => {
+            alert('New round initiated by admin.');
+        }).catch((error) => {
+            console.error("Error incrementing round: ", error);
+        });
+    }
+
     function selectImage() {
         let selectedImage = getCookie('selectedImage');
         if (!selectedImage) {
             selectedImage = images[Math.floor(Math.random() * images.length)];
-            setCookie('selectedImage', selectedImage, 7); // Set cookie for 7 days
+            setCookie('selectedImage', selectedImage, 7); // Imposta il cookie per 7 giorni
         }
         imageElement.src = selectedImage;
     }
@@ -52,19 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return urlParams.has('admin');
     }
 
-    function incrementRound() {
-        const roundRef = database.ref('round');
-        roundRef.transaction((currentRound) => {
-            return (currentRound || 0) + 1;
-        }).then(() => {
-            alert('New round initiated by admin.');
-        }).catch((error) => {
-            console.error("Error incrementing round: ", error);
-        });
-    }
-
     if (checkAdmin()) {
-        // Hide the image and message for admin
+        // Nascondi l'immagine e il messaggio per l'admin
         imageElement.style.display = 'none';
         messageElement.style.display = 'none';
         adminResetButton.style.display = 'block';
@@ -74,6 +92,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     adminResetButton.addEventListener('click', () => {
         resetCookie('selectedImage');
-        alert('New round initiated by admin.');
     });
 });
