@@ -52,10 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.cookie = `${name}=${value}; ${expires}; path=/`;
     }
 
-    function resetCookie(name) {
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-        incrementRound();
-    }
 
     function incrementRound() {
         const roundRef = ref(database, 'round');
@@ -106,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     adminResetButton.addEventListener('click', () => {
-        resetCookie('selectedImage');
-        resetCookie('currentRound');
+        incrementRound();
     });
 });
