@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const currentRound = getCookie('currentRound');
 
                     // Se il round è cambiato, seleziona una nuova immagine
-                    if (currentRound !== roundFromDb) {
+                    if (currentRound != roundFromDb) {
                         console.log(currentRound, roundFromDb);
                         // Trova l'immagine con il numero di selezioni minore
                         let minSelections = Infinity;
