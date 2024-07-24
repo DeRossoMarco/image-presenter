@@ -1,3 +1,18 @@
+const firebaseConfig = {
+    apiKey: "AIzaSyDlKYfKl6b2tCXjJYP3raQIEW0lMatcDHk",
+    authDomain: "giocovacanzina.firebaseapp.com",
+    databaseURL: "https://giocovacanzina-default-rtdb.firebaseio.com",
+    projectId: "giocovacanzina",
+    storageBucket: "giocovacanzina.appspot.com",
+    messagingSenderId: "807834218186",
+    appId: "1:807834218186:web:d3bc04429069cbf4a34e33",
+    measurementId: "G-X9R10EH2K6"
+  };
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
 // Define the folder path
 const imageFolderPath = 'images/';
 
@@ -32,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resetCookie(name) {
         document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        incrementRound();
     }
 
     function selectImage() {
@@ -46,6 +62,17 @@ document.addEventListener('DOMContentLoaded', () => {
     function checkAdmin() {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.has('admin');
+    }
+
+    function incrementRound() {
+        const roundRef = database.ref('round');
+        roundRef.transaction((currentRound) => {
+            return (currentRound || 0) + 1;
+        }).then(() => {
+            alert('New round initiated by admin.');
+        }).catch((error) => {
+            console.error("Error incrementing round: ", error);
+        });
     }
 
     if (checkAdmin()) {
