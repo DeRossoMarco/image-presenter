@@ -92,31 +92,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (imageSelectionsSnapshot.exists() && roundSnapshot.exists()) {
                     const imageSelections = imageSelectionsSnapshot.val();
                     const roundFromDb = roundSnapshot.val();
+                    const currentRound = getCookie('currentRound');
 
-                    // Trova l'immagine con il numero di selezioni minore
-                    let minSelections = Infinity;
-                    let selectedImage = null;
+                    // Se il round è cambiato, seleziona una nuova immagine
+                    if (currentRound !== roundFromDb) {
+                        // Trova l'immagine con il numero di selezioni minore
+                        let minSelections = Infinity;
+                        let selectedImage = null;
 
-                    for (const [encodedImage, count] of Object.entries(imageSelections)) {
-                        if (count < minSelections) {
-                            minSelections = count;
-                            selectedImage = decodeFileName(encodedImage);
+                        for (const [encodedImage, count] of Object.entries(imageSelections)) {
+                            if (count < minSelections) {
+                                minSelections = count;
+                                selectedImage = decodeFileName(encodedImage);
+                            }
+                        }
+
+                        // Se non ci sono immagini, scegli a caso
+                        if (!selectedImage) {
+                            selectedImage = images[Math.floor(Math.random() * images.length)];
+                        }
+
+                        // Aggiorna il conteggio delle selezioni per l'immagine selezionata
+                        set(ref(database, `imageSelections/${encodeFileName(selectedImage)}`), minSelections + 1)
+                            .then(() => {
+                                setCookie('selectedImage', selectedImage, 7); // Imposta il cookie per 7 giorni
+                                setCookie('currentRound', roundFromDb, 7); // Imposta il cookie per 7 giorni
+                                imageElement.src = selectedImage;
+                            }).catch((error) => {
+                                console.error("Error updating image selection count: ", error);
+                            });
+                    } else {
+                        // Carica l'immagine esistente dal cookie se il round non è cambiato
+                        const existingImage = getCookie('selectedImage');
+                        if (existingImage) {
+                            imageElement.src = existingImage;
                         }
                     }
-
-                    if (!selectedImage || getCookie('currentRound') !== roundFromDb) {
-                        selectedImage = images[Math.floor(Math.random() * images.length)];
-                    }
-
-                    // Aggiorna il conteggio delle selezioni per l'immagine selezionata
-                    set(ref(database, `imageSelections/${encodeFileName(selectedImage)}`), minSelections + 1)
-                        .then(() => {
-                            setCookie('selectedImage', selectedImage, 7); // Imposta il cookie per 7 giorni
-                            setCookie('currentRound', roundFromDb, 7); // Imposta il cookie per 7 giorni
-                            imageElement.src = selectedImage;
-                        }).catch((error) => {
-                            console.error("Error updating image selection count: ", error);
-                        });
                 } else {
                     console.log("No image selection data or round data available");
                 }
