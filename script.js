@@ -34,6 +34,15 @@ const imageFilenames = [
 // Genera gli URL completi delle immagini
 const images = imageFilenames.map(filename => imageFolderPath + filename);
 
+// Funzioni di codifica e decodifica Base64
+function encodeFileName(filename) {
+    return btoa(filename); // Base64 encode
+}
+
+function decodeFileName(encodedFilename) {
+    return atob(encodedFilename); // Base64 decode
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const imageElement = document.getElementById('selectedImage');
     const messageElement = document.getElementById('message');
@@ -55,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function resetImageSelections() {
         const imageSelectionsRef = ref(database, 'imageSelections');
         set(imageSelectionsRef, imageFilenames.reduce((acc, filename) => {
-            acc[filename] = 0;
+            acc[encodeFileName(filename)] = 0;
             return acc;
         }, {})).catch((error) => {
             console.error("Error resetting image selections: ", error);
@@ -88,10 +97,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     let minSelections = Infinity;
                     let selectedImage = null;
 
-                    for (const [image, count] of Object.entries(imageSelections)) {
+                    for (const [encodedImage, count] of Object.entries(imageSelections)) {
                         if (count < minSelections) {
                             minSelections = count;
-                            selectedImage = image;
+                            selectedImage = decodeFileName(encodedImage);
                         }
                     }
 
@@ -100,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     // Aggiorna il conteggio delle selezioni per l'immagine selezionata
-                    set(ref(database, `imageSelections/${selectedImage}`), minSelections + 1)
+                    set(ref(database, `imageSelections/${encodeFileName(selectedImage)}`), minSelections + 1)
                         .then(() => {
                             setCookie('selectedImage', selectedImage, 7); // Imposta il cookie per 7 giorni
                             setCookie('currentRound', roundFromDb, 7); // Imposta il cookie per 7 giorni
