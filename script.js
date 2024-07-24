@@ -23,7 +23,7 @@ const database = getDatabase(app);
 // Definisci il percorso della cartella immagini
 const imageFolderPath = 'images/';
 
-// Array di nomi di file immagine
+// Array di nomi di file immagine con estensioni
 const imageFilenames = [
     'cars.jpg',
     'dragon_trainer.jpeg',
@@ -31,17 +31,16 @@ const imageFilenames = [
     'madagascar.jpg'
 ];
 
+// Rimuove l'estensione dal nome del file
+function removeExtension(filename) {
+    return filename.split('.').slice(0, -1).join('.');
+}
+
+// Array di nomi di file immagine senza estensioni
+const imageFilenamesWithoutExt = imageFilenames.map(removeExtension);
+
 // Genera gli URL completi delle immagini
 const images = imageFilenames.map(filename => imageFolderPath + filename);
-
-// Funzioni di codifica e decodifica Base64
-function encodeFileName(filename) {
-    return btoa(filename); // Base64 encode
-}
-
-function decodeFileName(encodedFilename) {
-    return atob(encodedFilename); // Base64 decode
-}
 
 document.addEventListener('DOMContentLoaded', () => {
     const imageElement = document.getElementById('selectedImage');
@@ -63,8 +62,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resetImageSelections() {
         const imageSelectionsRef = ref(database, 'imageSelections');
-        set(imageSelectionsRef, imageFilenames.reduce((acc, filename) => {
-            acc[encodeFileName(filename)] = 0;
+        set(imageSelectionsRef, imageFilenamesWithoutExt.reduce((acc, filename) => {
+            acc[filename] = 0;
             return acc;
         }, {})).catch((error) => {
             console.error("Error resetting image selections: ", error);
@@ -100,24 +99,24 @@ document.addEventListener('DOMContentLoaded', () => {
                         let minSelections = Infinity;
                         let selectedImage = null;
 
-                        for (const [encodedImage, count] of Object.entries(imageSelections)) {
+                        for (const [filename, count] of Object.entries(imageSelections)) {
                             if (count < minSelections) {
                                 minSelections = count;
-                                selectedImage = decodeFileName(encodedImage);
+                                selectedImage = filename;
                             }
                         }
 
                         // Se non ci sono immagini, scegli a caso
                         if (!selectedImage) {
-                            selectedImage = images[Math.floor(Math.random() * images.length)];
+                            selectedImage = imageFilenamesWithoutExt[Math.floor(Math.random() * imageFilenamesWithoutExt.length)];
                         }
 
                         // Aggiorna il conteggio delle selezioni per l'immagine selezionata
-                        set(ref(database, `imageSelections/${encodeFileName(selectedImage)}`), minSelections + 1)
+                        set(ref(database, `imageSelections/${selectedImage}`), minSelections + 1)
                             .then(() => {
                                 setCookie('selectedImage', selectedImage, 7); // Imposta il cookie per 7 giorni
                                 setCookie('currentRound', roundFromDb, 7); // Imposta il cookie per 7 giorni
-                                imageElement.src = selectedImage;
+                                imageElement.src = `${imageFolderPath}${selectedImage}.jpg`; // Ripristina l'estensione per l'URL
                             }).catch((error) => {
                                 console.error("Error updating image selection count: ", error);
                             });
@@ -125,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         // Carica l'immagine esistente dal cookie se il round non è cambiato
                         const existingImage = getCookie('selectedImage');
                         if (existingImage) {
-                            imageElement.src = existingImage;
+                            imageElement.src = `${imageFolderPath}${existingImage}.jpg`; // Ripristina l'estensione per l'URL
                         }
                     }
                 } else {
