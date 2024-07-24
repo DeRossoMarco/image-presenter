@@ -1,25 +1,21 @@
+// Define the folder path
 const imageFolderPath = 'images/';
+
+// Array of image filenames
 const imageFilenames = [
     'cars.jpg',
     'dragon_trainer.jpeg',
     'era_glaciale.jpg',
     'madagascar.jpg'
 ];
+
+// Generate the full image URLs
 const images = imageFilenames.map(filename => imageFolderPath + filename);
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     const imageElement = document.getElementById('selectedImage');
     const messageElement = document.getElementById('message');
     const adminResetButton = document.getElementById('adminResetButton');
-
-    async function fetchConfig() {
-        try {
-            const response = await fetch('config.json');
-            return await response.json();
-        } catch (error) {
-            console.error('Error fetching config:', error);
-        }
-    }
 
     function getCookie(name) {
         const value = `; ${document.cookie}`;
@@ -34,28 +30,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.cookie = `${name}=${value}; ${expires}; path=/`;
     }
 
-    async function selectImage() {
-        try {
-            const config = await fetchConfig();
-            const round = config.round;
-            let cookieRound = getCookie('round');
-            let selectedImage = getCookie('selectedImage');
+    function resetCookie(name) {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    }
 
-            if (!cookieRound || cookieRound != round) {
-                // Set round cookie and select a new random image
-                setCookie('round', round, 7);
-                if (!selectedImage) {
-                    selectedImage = images[Math.floor(Math.random() * images.length)];
-                    setCookie('selectedImage', selectedImage, 7); // Set cookie for 7 days
-                }
-                imageElement.src = selectedImage;
-            } else {
-                // Display the image based on the round
-                imageElement.src = selectedImage;
-            }
-        } catch (error) {
-            console.error('Error selecting image:', error);
+    function selectImage() {
+        let selectedImage = getCookie('selectedImage');
+        if (!selectedImage) {
+            selectedImage = images[Math.floor(Math.random() * images.length)];
+            setCookie('selectedImage', selectedImage, 7); // Set cookie for 7 days
         }
+        imageElement.src = selectedImage;
     }
 
     function checkAdmin() {
@@ -64,29 +49,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (checkAdmin()) {
+        // Hide the image and message for admin
         imageElement.style.display = 'none';
         messageElement.style.display = 'none';
         adminResetButton.style.display = 'block';
-        adminResetButton.addEventListener('click', async () => {
-            try {
-                // Trigger the GitHub Action to update config.json
-                const response = await fetch('/.netlify/functions/update-config', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'incrementRound' })
-                });
-
-                if (response.ok) {
-                    alert('New round initiated by admin.');
-                    location.reload(); // Reload the page to apply changes
-                } else {
-                    console.error('Error updating round:', await response.text());
-                }
-            } catch (error) {
-                console.error('Error initiating new round:', error);
-            }
-        });
     } else {
         selectImage();
     }
+
+    adminResetButton.addEventListener('click', () => {
+        resetCookie('selectedImage');
+        alert('New round initiated by admin.');
+    });
 });
