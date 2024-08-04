@@ -25,10 +25,10 @@ const imageFolderPath = 'images/';
 
 // Array di nomi di file immagine con estensioni
 const imageFilenames = [
-    'bugs_bunny.jpg',
-    'groot.jpg',
-    'melmann.jpg',
-    'school_of_rock.jpg'
+    'bugs_bunny.jpg','taddeo.jpg','taz.jpg','michael_jordan.jpg',
+    'groot.jpg','thanos.jpg','star_lord.jpg','rocket.jpg',
+    'melmann.jpg','gloria.jpg','marty.jpg','alex.jpg',
+    'tomika.jpg','summer.jpg','freddy.jpg','school_of_rock.jpg'
 ];
 
 // Rimuove l'estensione dal nome del file
